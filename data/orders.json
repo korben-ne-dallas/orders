@@ -1,0 +1,22 @@
+[
+  {
+    "userId": 1,
+    "deliveryAddress": "Cool street 5",
+    "orderDate": "12/11/2024",
+    "status": "RECEIVED",
+    "note": "This order was imported using upload API"
+  },
+  {
+    "userId": 1,
+    "deliveryAddress": "Cool street 5",
+    "orderDate": "10/11/2024",
+    "status": "CANCELED",
+    "note": "This order was imported using upload API"
+  },
+  {
+    "deliveryAddress": "Cool street 5",
+    "orderDate": "10/11/2024",
+    "status": "CANCELED",
+    "note": "This order was imported using upload API and it has no user assigned"
+  }
+]

@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import {Collection, Entity, OneToMany, PrimaryKey, Property} from "@mikro-orm/core";
+import {Order} from "../order/order.entity";
 
 @Entity({ tableName: "users" })
 export class User {
@@ -10,4 +11,7 @@ export class User {
 
     @Property()
     password!: string
+
+    @OneToMany(() => Order, order => order.user)
+    orders = new Collection<Order>(this);
 }

@@ -12,7 +12,7 @@ export default defineConfig({
     host: 'localhost', //TODO think how to path this in docker and kubernetes
     user: 'postgres', //TODO move to env file
     password: 'postgres', //TODO move to env file
-    entities: ['dist/db/models/**/*.entity.js'],
+    entities: ['dist/modules/**/*.entity.js'],
     debug: true,
     highlighter: new SqlHighlighter(),
     ...options,
