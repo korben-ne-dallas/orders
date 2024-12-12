@@ -1,15 +1,14 @@
-import { EntityManager, MikroORM, Options } from "@mikro-orm/postgresql";
+import { EntityManager, EntityRepository, MikroORM, Options } from "@mikro-orm/postgresql";
 import { User } from "./modules/user/user.entity";
 import config from "./mikro-orm.config";
 import { UserRepository } from "./modules/user/user.repository";
 import { Order } from "./modules/order/order.entity";
-import { OrderRepository } from "./modules/order/order.repository";
 
 export interface Services {
     orm: MikroORM;
     em: EntityManager;
     user: UserRepository;
-    order: OrderRepository;
+    order: EntityRepository<Order>;
 }
 
 export let db: Services;
