@@ -8,10 +8,10 @@ options.metadataProvider = TsMorphMetadataProvider;
 
 export default defineConfig({
     driver: PostgreSqlDriver,
-    dbName: 'orders-app', //TODO mode to env file
-    host: 'localhost', //TODO think how to path this in docker and kubernetes
-    user: 'postgres', //TODO move to env file
-    password: 'postgres', //TODO move to env file
+    dbName: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
     entities: ['dist/modules/**/*.entity.js'],
     debug: true,
     highlighter: new SqlHighlighter(),

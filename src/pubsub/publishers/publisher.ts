@@ -14,22 +14,22 @@ const config: PubSubConfig = {
     keyFilename: process.env.KEY_FILE,
 };
 
-if (!config.projectId || !config.topicName || !config.subscriptionName || !config.keyFilename) {
-    throw new Error('Missing required configurations. Please check environment variables.');
-}
+const isPubSubEnabled = process.env.ENABLE_PUBSUB === 'true';
 
-const pubsub = new PubSub({
-    projectId: config.projectId,
-    keyFilename: config.keyFilename,
-});
+const pubsub = isPubSubEnabled
+    ? new PubSub({
+        projectId: config.projectId,
+        keyFilename: config.keyFilename,
+    })
+    : null;
 
 async function initializePubSub(): Promise<{ topic: Topic; subscription: Subscription }> {
-    let topic: Topic = pubsub.topic(config.topicName!);
+    let topic: Topic = pubsub!.topic(config.topicName!);
 
     const [isTopicExists] = await topic.exists();
 
     if (!isTopicExists) {
-        [topic] = await pubsub.createTopic(config.topicName!);
+        [topic] = await pubsub!.createTopic(config.topicName!);
         console.log(`Topic "${config.topicName}" created.`);
     }
 
@@ -45,6 +45,11 @@ async function initializePubSub(): Promise<{ topic: Topic; subscription: Subscri
 }
 
 export async function publishMessage(data: Record<string, any>): Promise<void> {
+    if (!isPubSubEnabled) {
+        console.log('Pub/Sub is disabled. Message is skipped.');
+        return;
+    }
+
     const { topic } = await initializePubSub();
 
     const stringifyData = JSON.stringify(data);

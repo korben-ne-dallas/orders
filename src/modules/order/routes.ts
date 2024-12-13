@@ -2,12 +2,15 @@ import { db } from '../../db';
 import { Router, Request, Response } from 'express';
 import { Order } from "./order.entity";
 import fileUpload from "express-fileupload";
-import {User} from "../user/user.entity";
 
 const router = Router();
 
 router.get('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
+
+    if (!id) {
+        res.status(400).json({ error: 'Order id is required!' });
+    }
 
     const order = await db.order.findOne(+id, {populate: ['user']});
 
@@ -16,6 +19,10 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.post('/', async (req: Request, res: Response) => {
     const { deliveryAddress, orderDate, note, status, userId } = req.body;
+
+    if (!deliveryAddress || !orderDate || !status) {
+        res.status(400).json({ error: '"deliveryAddress", "orderDate" and "status" are required!' });
+    }
 
     const user = userId && await db.user.findOne(userId);
 
@@ -34,6 +41,11 @@ router.post('/', async (req: Request, res: Response) => {
 
 router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
+
+    if (!id) {
+        res.status(400).json({ error: 'Order id is required!' });
+    }
+
     const { deliveryAddress, orderDate, status, note, userId } = req.body;
 
     const order = await db.order.findOne(+id);
@@ -61,6 +73,10 @@ router.put('/:id', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
+
+    if (!id) {
+        res.status(400).json({ error: 'Order id is required!' });
+    }
 
     const order = await db.order.findOne(+id);
 

@@ -3,9 +3,16 @@ import Mailgun from 'mailgun.js';
 
 const mailgun = new Mailgun(FormData);
 
-const mg = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY!});
+const isEmailFeatureEnabled = process.env.ENABLE_PUBSUB === 'true';
+
+const mg = isEmailFeatureEnabled
+    ? mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY!})
+    : null;
 
 export async function sendEmail(userId: number) {
+    if (!mg) {
+        return;
+    }
 
     return mg.messages.create(process.env.MAILGUN_DOMAIN!, {
         from: `Orders APP <${process.env.MAILGUN_FROM_ADDRESS}>`,

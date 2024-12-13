@@ -18,7 +18,7 @@ export class Order {
 
     @Property()
     @Index()
-    status!: string //TODO change it to enum
+    status!: string
 
     @Property({ type: 'text'})
     note?: string

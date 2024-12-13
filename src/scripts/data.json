@@ -1,0 +1,22 @@
+[
+  { "email": "will@smith.com", "name": "Will" },
+  { "email": "jane@doe.com", "name": "Jane" },
+  { "email": "john@doe.com", "name": "John" },
+  { "email": "alice@wonderland.com", "name": "Alice" },
+  { "email": "bob@builder.com", "name": "Bob" },
+  { "email": "charlie@chocolate.com", "name": "Charlie" },
+  { "email": "dave@rocket.com", "name": "Dave" },
+  { "email": "emma@stone.com", "name": "Emma" },
+  { "email": "frank@castle.com", "name": "Frank" },
+  { "email": "grace@hopper.com", "name": "Grace" },
+  { "email": "harry@potter.com", "name": "Harry" },
+  { "email": "iris@west.com", "name": "Iris" },
+  { "email": "jack@daniels.com", "name": "Jack" },
+  { "email": "katie@holmes.com", "name": "Katie" },
+  { "email": "leo@diCaprio.com", "name": "Leo" },
+  { "email": "mary@poppins.com", "name": "Mary" },
+  { "email": "nancy@drew.com", "name": "Nancy" },
+  { "email": "oliver@twist.com", "name": "Oliver" },
+  { "email": "peter@parker.com", "name": "Peter" },
+  { "email": "quincy@jones.com", "name": "Quincy" }
+]

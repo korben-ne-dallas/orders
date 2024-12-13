@@ -20,6 +20,7 @@ Before starting, ensure you have the following installed:
 
 #### 4. (Optional) Enable Google Pub/Sub and Email Service functionality:
 - Update the `.env` file with Google Pub/Sub configuration and include a key file named `orders-app-key.json`
+- Enable the `ENABLE_PUBSUB` feature flag in the `.env`
 - Update the `.env` file with email service configuration
 
 #### 5. Start Minikube:

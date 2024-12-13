@@ -18,16 +18,16 @@ const config: PubSubConfig = {
     keyFilename: process.env.KEY_FILE,
 };
 
-if (!config.projectId || !config.topicName || !config.subscriptionName || !config.keyFilename) {
-    throw new Error('Missing required configurations. Please check environment variables.');
-}
+const isPubSubEnabled = process.env.ENABLE_PUBSUB === 'true';
 
-const pubsub = new PubSub({
-    projectId: config.projectId,
-    keyFilename: config.keyFilename,
-});
+const pubsub = isPubSubEnabled
+    ? new PubSub({
+        projectId: config.projectId,
+        keyFilename: config.keyFilename,
+    })
+    : null;
 
-async function sendEmailAboutNewUser(message: Message, user: User, em: SqlEntityManager) {
+async function sendEmailAboutNewUser(user: User, em: SqlEntityManager) {
     let isSuccess = true;
 
     try {
@@ -36,7 +36,7 @@ async function sendEmailAboutNewUser(message: Message, user: User, em: SqlEntity
 
         const response = await sendEmail(user.id);
 
-        if (response.status !== 200) {
+        if (response && response.status !== 200) {
             isSuccess = false;
         }
     } catch (error) {
@@ -47,6 +47,11 @@ async function sendEmailAboutNewUser(message: Message, user: User, em: SqlEntity
 }
 
 export async function initSubscriber() {
+    if (!isPubSubEnabled || !pubsub) {
+        console.log('Pub/Sub is disabled. Subscriber initialization skipped.');
+        return;
+    }
+
     let topic: Topic = pubsub.topic(config.topicName!);
     const [isTopicExists] = await topic.exists();
 
@@ -74,7 +79,7 @@ export async function initSubscriber() {
             }
 
             if (user) {
-                const isSuccess = await sendEmailAboutNewUser(message, user, em);
+                const isSuccess = await sendEmailAboutNewUser(user, em);
 
                 if (!isSuccess) {
                     user.verified = false;

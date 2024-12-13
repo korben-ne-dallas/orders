@@ -3,9 +3,9 @@ import Knex from "knex";
 export const knexQueryBuilder = Knex({
     client: 'pg',
     connection: {
-        host: 'localhost', //TODO think how to path this in docker and kubernetes
-        user: 'postgres',
-        password: 'postgres',
-        database: 'orders-app',
+        host: process.env.DB_HOST,
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
     },
 });

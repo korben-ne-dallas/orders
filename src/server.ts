@@ -3,7 +3,7 @@ import app from './app';
 import { initORM } from "./db";
 import { initSubscriber } from "./pubsub/subscribers/subscriber";
 
-const port: number = 3000; //TODO move to env file
+const port: number = Number(process.env.SERVER_PORT) || 3000;
 
 (async () => {
     await initORM();

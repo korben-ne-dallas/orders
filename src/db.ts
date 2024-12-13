@@ -1,13 +1,12 @@
 import { EntityManager, EntityRepository, MikroORM, Options } from "@mikro-orm/postgresql";
 import { User } from "./modules/user/user.entity";
 import config from "./mikro-orm.config";
-import { UserRepository } from "./modules/user/user.repository";
 import { Order } from "./modules/order/order.entity";
 
 export interface Services {
     orm: MikroORM;
     em: EntityManager;
-    user: UserRepository;
+    user: EntityRepository<User>;
     order: EntityRepository<Order>;
 }
 

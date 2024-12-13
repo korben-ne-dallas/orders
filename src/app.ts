@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import fileUpload from 'express-fileupload';
 import routes from './modules/routes';
 import {RequestContext} from "@mikro-orm/core";
@@ -17,5 +17,15 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', routes);
+
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+    console.error('An error occurred:', err.message || err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+    });
+};
+
+app.use(errorHandler);
 
 export default app;
