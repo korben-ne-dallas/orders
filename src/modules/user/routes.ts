@@ -1,6 +1,7 @@
 import { db } from '../../db';
 import { Router, Request, Response } from 'express';
 import { knexQueryBuilder } from "../../queryBuilder";
+import { publishMessage } from "../../pubsub/publishers/publisher";
 
 const router = Router();
 
@@ -16,6 +17,8 @@ router.post('/', async (req: Request, res: Response) => {
         const savedUser = db.user.create({ email, name });
 
         await db.em.flush();
+        await publishMessage({ userId: savedUser.id });
+
         res.status(201).json(savedUser);
     } catch (error) {
         res.status(400).json({ message: 'Email already in use' });

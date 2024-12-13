@@ -19,6 +19,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@google-cloud/pubsub": "^4.9.0",
     "@mikro-orm/cli": "^6.4.1",
     "@mikro-orm/core": "^6.4.1",
     "@mikro-orm/migrations": "^6.4.1",
@@ -26,9 +27,11 @@
     "@mikro-orm/reflection": "^6.4.1",
     "@mikro-orm/sql-highlighter": "^1.0.1",
     "@types/express-fileupload": "^1.5.1",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-fileupload": "^1.5.1",
     "knex": "^3.1.0",
+    "mailgun.js": "^10.2.4",
     "pg": "^8.13.1"
   }
 }

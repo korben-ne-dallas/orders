@@ -15,4 +15,7 @@ export class User {
 
     @OneToMany(() => Order, order => order.user)
     orders = new Collection<Order>(this);
+
+    @Property()
+    verified?: boolean
 }

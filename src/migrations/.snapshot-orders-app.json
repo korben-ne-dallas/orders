@@ -34,6 +34,15 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
+        },
+        "verified": {
+          "name": "verified",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
         }
       },
       "name": "users",
