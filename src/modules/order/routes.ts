@@ -94,46 +94,42 @@ router.post('/_list', async (req: Request, res: Response) => {
 
     if (!page || !size) {
         res.status(400).json({ error: 'Both "page" and "size" parameters are required!' });
+        return;
     }
 
     const pageNumber = parseInt(page, 10);
     const pageSize = parseInt(size, 10);
 
     if (isNaN(pageNumber) || isNaN(pageSize) || pageNumber < 1 || pageSize < 1) {
-        res.status(400).json({ error: '"page" and "size" must be positive numbers' });
+        res.status(400).json({ error: '"page" and "size" must be positive numbers!' });
         return;
     }
 
-    try {
-        const filters: Record<string, string> = {};
+    const filters: Record<string, string> = {};
 
-        if (userId !== undefined) {
-            filters.user = userId;
-        }
-
-        if (status !== undefined) {
-            filters.status = status;
-        }
-
-        const offset = (pageNumber - 1) * pageSize;
-
-        const [orders, total] = await db.em.findAndCount(Order, filters, {
-            limit: pageSize,
-            offset,
-            orderBy: { id: 'ASC' },
-            fields: ['orderDate', 'status']
-        });
-
-        const totalPages = Math.ceil(total / pageSize);
-
-        res.json({
-            list: orders,
-            totalPages
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred while fetching orders' });
+    if (userId !== undefined) {
+        filters.user = userId;
     }
+
+    if (status !== undefined) {
+        filters.status = status;
+    }
+
+    const offset = (pageNumber - 1) * pageSize;
+
+    const [orders, total] = await db.em.findAndCount(Order, filters, {
+        limit: pageSize,
+        offset,
+        orderBy: { id: 'ASC' },
+        fields: ['orderDate', 'status']
+    });
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    res.json({
+        list: orders,
+        totalPages
+    });
 });
 
 router.post('/upload', async (req: Request, res: Response) => {

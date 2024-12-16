@@ -196,4 +196,93 @@ describe('Order Routes', () => {
 
         expect(response.status).toBe(404);
     });
+
+    it('should fail to list orders when page number is not specified', async () => {
+        const response = await request(app)
+            .post('/api/order/_list')
+            .send({ size: 20 });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error).toBe('Both "page" and "size" parameters are required!');
+    });
+
+    it('should fail to list orders when page number is negative', async () => {
+        const response = await request(app)
+            .post('/api/order/_list')
+            .send({ page: -1, size: 20 });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error).toBe('"page" and "size" must be positive numbers!');
+    });
+
+    it('should fail to list orders when size is not specified', async () => {
+        const response = await request(app)
+            .post('/api/order/_list')
+            .send({ page: 1 });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error).toBe('Both "page" and "size" parameters are required!');
+    });
+
+    it('should list orders without any filtering', async () => {
+        await RequestContext.create(db.orm.em, async () => {
+            const firstOrder = db.order.create({ orderDate: '10/11/2024', deliveryAddress: 'Some street 5', status: 'CREATED' });
+            const secondOrder = db.order.create({ orderDate: '10/11/2024', deliveryAddress: 'Some street 5', status: 'CREATED' });
+            const thirdOrder = db.order.create({ orderDate: '10/11/2024', deliveryAddress: 'Some street 5', status: 'CREATED' });
+            const fourthOrder = db.order.create({ orderDate: '10/11/2024', deliveryAddress: 'Some street 5', status: 'CREATED' });
+            const fifthOrder = db.order.create({ orderDate: '10/11/2024', deliveryAddress: 'Some street 5', status: 'CREATED' });
+            await db.em.persistAndFlush([firstOrder, secondOrder, thirdOrder, fourthOrder, fifthOrder]);
+
+            const response = await request(app)
+                .post('/api/order/_list')
+                .send({ page: 1, size: 2 });
+
+            expect(response.status).toBe(200);
+            expect(response.body.list.length).toBe(2);
+            expect(response.body.totalPages).toBe(3);
+        });
+    });
+
+    it('should list orders filtered by userId', async () => {
+        await RequestContext.create(db.orm.em, async () => {
+            const firstUser = db.user.create({ email: 'first@test.com', name: 'First' });
+            const secondUser = db.user.create({ email: 'secondl@test.com', name: 'Second' });
+
+            const firstOrder = db.order.create({ user: firstUser, orderDate: '10/11/2024', deliveryAddress: 'User 1 address', status: 'CREATED' });
+            const secondOrder = db.order.create({ user: secondUser, orderDate: '10/11/2024', deliveryAddress: 'User 2 address', status: 'CREATED' });
+            const thirdOrder = db.order.create({ user: firstUser, orderDate: '10/11/2024', deliveryAddress: 'User 1 address', status: 'RECEIVED' });
+
+            await db.em.persistAndFlush([firstOrder, secondOrder, thirdOrder]);
+
+            const response = await request(app)
+                .post('/api/order/_list')
+                .send({ page: 1, size: 20, userId: firstUser.id });
+
+            expect(response.status).toBe(200);
+            expect(response.body.list.length).toBe(2);
+            expect(response.body.totalPages).toBe(1);
+            expect(response.body.list[0].status).toBe('CREATED');
+            expect(response.body.list[1].status).toBe('RECEIVED');
+        });
+    });
+
+    it('should list orders filtered by status', async () => {
+        await RequestContext.create(db.orm.em, async () => {
+            const firstOrder = db.order.create({ orderDate: '12/12/2024', deliveryAddress: 'Some street 5', status: 'CREATED' });
+            const secondOrder = db.order.create({ orderDate: '10/11/2024', deliveryAddress: 'Some street 5', status: 'RECEIVED' });
+            const thirdOrder = db.order.create({ orderDate: '10/11/2024', deliveryAddress: 'Some street 5', status: 'RECEIVED' });
+
+            await db.em.persistAndFlush([firstOrder, secondOrder, thirdOrder]);
+
+            const response = await request(app)
+                .post('/api/order/_list')
+                .send({ page: 1, size: 20, status: 'CREATED' });
+
+            expect(response.status).toBe(200);
+            expect(response.body.list.length).toBe(1);
+            expect(response.body.totalPages).toBe(1);
+            expect(response.body.list[0].status).toBe('CREATED');
+            expect(response.body.list[0].orderDate).toBe(firstOrder.orderDate.toISOString());
+        });
+    });
 });
