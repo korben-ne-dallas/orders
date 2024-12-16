@@ -10,9 +10,10 @@ router.get('/:id', async (req: Request, res: Response) => {
 
     if (!id) {
         res.status(400).json({ error: 'Order id is required!' });
+        return;
     }
 
-    const order = await db.order.findOne(+id, {populate: ['user']});
+    const order = await db.order.findOne(+id, { populate: ['user'] });
 
     res.send(order);
 });
@@ -22,6 +23,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     if (!deliveryAddress || !orderDate || !status) {
         res.status(400).json({ error: '"deliveryAddress", "orderDate" and "status" are required!' });
+        return;
     }
 
     const user = userId && await db.user.findOne(userId);
@@ -36,7 +38,7 @@ router.post('/', async (req: Request, res: Response) => {
 
     await db.em.flush();
 
-    res.send(order);
+    res.status(201).send(order);
 });
 
 router.put('/:id', async (req: Request, res: Response) => {
@@ -44,6 +46,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     if (!id) {
         res.status(400).json({ error: 'Order id is required!' });
+        return;
     }
 
     const { deliveryAddress, orderDate, status, note, userId } = req.body;

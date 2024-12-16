@@ -1,44 +1,24 @@
 import request from 'supertest';
 import app from '../../src/app';
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import { initORM, db } from '../../src/db';
+import { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import { db } from '../../src/db';
 import { RequestContext } from '@mikro-orm/core';
 import { User } from "../../src/modules/user/user.entity";
-import { getKnexQueryBuilder, initKnex } from "../../src/queryBuilder";
+import  { cleanupTestContainer, resetDatabase, setupTestContainer } from '../utils/containerUtils';
 
 describe('User Routes', () => {
-    let pgContainer: StartedPostgreSqlContainer;
+    let testSetup: { pgContainer: StartedPostgreSqlContainer };
 
     beforeAll(async () => {
-        pgContainer = await new PostgreSqlContainer()
-            .withDatabase('test_db')
-            .withUsername('postgres')
-            .withPassword('postgres')
-            .start();
-
-        await initORM({
-            clientUrl: `postgresql://${pgContainer.getUsername()}:${pgContainer.getPassword()}@${pgContainer.getHost()}:${pgContainer.getPort()}/${pgContainer.getDatabase()}`
-        });
-
-        const migrator = db.orm.getMigrator();
-        await migrator.up();
-
-        await initKnex({
-            connectionString: pgContainer.getConnectionUri()
-        });
+        testSetup = await setupTestContainer();
     });
 
     afterAll(async () => {
-        await getKnexQueryBuilder().destroy();
-        await db.orm.close();
-        await pgContainer.stop();
+        await cleanupTestContainer(testSetup);
     });
 
     beforeEach(async () => {
-        await RequestContext.create(db.orm.em, async () => {
-            await db.orm.em.nativeDelete('users', {});
-            await db.orm.em.nativeDelete('orders', {});
-        });
+        await resetDatabase();
     });
 
     it('should fetch all users', async () => {
