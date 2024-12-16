@@ -14,7 +14,7 @@ export default defineConfig({
     password: process.env.DB_PASSWORD,
     entities: ['dist/modules/**/*.entity.js'],
     entitiesTs: ['src/**/*.entity.ts'],
-    debug: true,
+    debug: false,
     highlighter: new SqlHighlighter(),
     ...options,
 });

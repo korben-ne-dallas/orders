@@ -99,6 +99,7 @@ router.post('/_list', async (req: Request, res: Response) => {
 
     if (isNaN(pageNumber) || isNaN(pageSize) || pageNumber < 1 || pageSize < 1) {
         res.status(400).json({ error: '"page" and "size" must be positive numbers' });
+        return;
     }
 
     try {

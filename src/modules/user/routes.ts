@@ -1,6 +1,6 @@
 import { db } from '../../db';
 import { Router, Request, Response } from 'express';
-import { knexQueryBuilder } from "../../queryBuilder";
+import { getKnexQueryBuilder } from "../../queryBuilder";
 import { publishMessage } from "../../pubsub/publishers/publisher";
 
 const router = Router();
@@ -13,6 +13,11 @@ router.get('/', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
     const { email, name } = req.body;
 
+    if (!email || !name) {
+        res.status(400).json({ error: '"email" and "name" are required fields!' });
+        return;
+    }
+
     try {
         const savedUser = db.user.create({ email, name });
 
@@ -21,8 +26,7 @@ router.post('/', async (req: Request, res: Response) => {
 
         res.status(201).json(savedUser);
     } catch (error) {
-        res.status(400).json({ message: 'Email already in use' });
-        return;
+        res.status(400).json({ error: 'Email already in use!' });
     }
 });
 
@@ -37,14 +41,14 @@ router.put('/:id', async (req: Request, res: Response) => {
             user.email = email || user.email;
             user.name = name || user.name;
         } else {
-            res.status(400).json({ message: 'No user with such id' });
+            res.status(400).json({ error: 'No user with such id!' });
             return;
         }
 
         await db.em.flush();
         res.json(user);
     } catch (error) {
-        res.status(400).json({ message: 'Email already in use' });
+        res.status(400).json({ error: 'Email already in use!' });
         return;
     }
 });
@@ -56,18 +60,21 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
     if (user) {
         await db.em.removeAndFlush(user);
+        res.json(user);
+        return;
     }
 
-    res.json(user);
+    res.status(400).json({ error: 'No user with such id!' });
 });
 
 router.get('/top', async (req: Request, res: Response) => {
     const { n } = req.query;
 
     if (n) {
-        const user = await knexQueryBuilder('users')
+        const user = await getKnexQueryBuilder()
+            .from('users')
             .leftJoin('orders', 'users.id', 'orders.user_id')
-            .select('users.id', 'users.name', knexQueryBuilder.raw('COUNT(orders.id) as count'))
+            .select('users.id', 'users.name', getKnexQueryBuilder().raw('COUNT(orders.id) as count'))
             .groupBy('users.id')
             .orderBy('count', 'desc')
             .limit(+n);
@@ -76,7 +83,7 @@ router.get('/top', async (req: Request, res: Response) => {
         return;
     }
 
-    res.status(400).json({ message: 'Request should contain n={n} query parameter' });
+    res.status(400).json({ error: 'Request should contain n={n} query parameter!' });
 });
 
 export default router;
