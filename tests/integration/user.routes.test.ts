@@ -34,52 +34,46 @@ describe('User Routes', () => {
     });
 
     it('should create a new user', async () => {
-        await RequestContext.create(db.orm.em, async () => {
-            const user = new User();
-            user.email = 'newuser@test.com';
-            user.name = 'New User';
+        const user = new User();
+        user.email = 'newuser@test.com';
+        user.name = 'New User';
 
-            const response = await request(app)
-                .post('/api/user')
-                .send(user);
+        const response = await request(app)
+            .post('/api/user')
+            .send(user);
 
-            expect(response.status).toBe(201);
-            expect(response.body).toMatchObject({
-                email: user.email,
-                name: user.name
-            });
+        expect(response.status).toBe(201);
+        expect(response.body).toMatchObject({
+            email: user.email,
+            name: user.name
         });
     });
 
     it('should not create a new user if email is empty', async () => {
-        await RequestContext.create(db.orm.em, async () => {
-            const user = new User();
-            user.name = 'New User';
+        const user = new User();
+        user.name = 'New User';
 
-            const response = await request(app)
-                .post('/api/user')
-                .send(user);
+        const response = await request(app)
+            .post('/api/user')
+            .send(user);
 
-            expect(response.status).toBe(400);
-            expect(response.body).toMatchObject({
-                error: '"email" and "name" are required fields!'
-            });
+        expect(response.status).toBe(400);
+        expect(response.body).toMatchObject({
+            error: '"email" and "name" are required fields!'
         });
     });
 
     it('should not create a new user if name is empty', async () => {
-        await RequestContext.create(db.orm.em, async () => {
-            const user = new User();
-            user.email = 'newuser@test.com';
+        const user = new User();
+        user.email = 'newuser@test.com';
 
-            const response = await request(app)
-                .post('/api/user')
-                .send(user);
+        const response = await request(app)
+            .post('/api/user')
+            .send(user);
 
-            expect(response.status).toBe(400);
-            expect(response.body).toMatchObject({
-                error: '"email" and "name" are required fields!'
-            });
+        expect(response.status).toBe(400);
+        expect(response.body).toMatchObject({
+            error: '"email" and "name" are required fields!'
         });
     });
 
@@ -166,18 +160,16 @@ describe('User Routes', () => {
     });
 
     it('should not update user if id is wrong', async () => {
-        await RequestContext.create(db.orm.em, async () => {
-            const user = new User();
-            user.email = 'will@smith.com';
+        const user = new User();
+        user.email = 'will@smith.com';
 
-            const response = await request(app)
-                .put('/api/user/123')
-                .send(user);
+        const response = await request(app)
+            .put('/api/user/123')
+            .send(user);
 
-            expect(response.status).toBe(400);
-            expect(response.body).toMatchObject({
-                error: 'No user with such id!'
-            });
+        expect(response.status).toBe(400);
+        expect(response.body).toMatchObject({
+            error: 'No user with such id!'
         });
     });
 
@@ -201,15 +193,13 @@ describe('User Routes', () => {
     });
 
     it('should not delete user if id is wrong', async () => {
-        await RequestContext.create(db.orm.em, async () => {
-            const response = await request(app)
-                .delete('/api/user/123');
+        const response = await request(app)
+            .delete('/api/user/123');
 
-            expect(response.status).toBe(400);
+        expect(response.status).toBe(400);
 
-            expect(response.body).toMatchObject({
-                error: 'No user with such id!'
-            });
+        expect(response.body).toMatchObject({
+            error: 'No user with such id!'
         });
     });
 
@@ -269,14 +259,12 @@ describe('User Routes', () => {
     });
 
     it('should return bad request if n parameter is missing', async () => {
-        await RequestContext.create(db.orm.em, async () => {
-            const response = await request(app)
-                .get('/api/user/top');
+        const response = await request(app)
+            .get('/api/user/top');
 
-            expect(response.status).toBe(400);
-            expect(response.body).toMatchObject({
-                error: 'Request should contain n={n} query parameter!'
-            });
+        expect(response.status).toBe(400);
+        expect(response.body).toMatchObject({
+            error: 'Request should contain n={n} query parameter!'
         });
     });
 });

@@ -44,11 +44,6 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    if (!id) {
-        res.status(400).json({ error: 'Order id is required!' });
-        return;
-    }
-
     const { deliveryAddress, orderDate, status, note, userId } = req.body;
 
     const order = await db.order.findOne(+id);
@@ -61,33 +56,37 @@ router.put('/:id', async (req: Request, res: Response) => {
 
         if (userId) {
             const user = await db.user.findOne(+userId);
+
             if (!user) {
-                order.user = undefined;
-            } else {
-                order.user = user;
+                res.status(400).json({ error: 'No user with such id!' });
+                return;
             }
+
+            order.user = user;
         }
+
+        await db.em.flush();
+
+        res.send(order);
+        return;
     }
 
-    await db.em.flush();
-
-    res.send(order);
+    res.status(400).json({ error: 'No order with such id!' });
 });
 
 router.delete('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    if (!id) {
-        res.status(400).json({ error: 'Order id is required!' });
-    }
-
     const order = await db.order.findOne(+id);
 
     if (order) {
         await db.em.removeAndFlush(order);
+
+        res.send(order);
+        return;
     }
 
-    res.send(order);
+    res.status(400).json({ error: 'No order with such id!' });
 });
 
 router.post('/_list', async (req: Request, res: Response) => {
