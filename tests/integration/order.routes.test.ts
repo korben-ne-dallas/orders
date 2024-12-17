@@ -5,6 +5,8 @@ import { db } from "../../src/db";
 import request from "supertest";
 import app from "../../src/app";
 import { Order } from "../../src/modules/order/order.entity";
+import path from 'path';
+import { getKnexQueryBuilder } from "../../src/queryBuilder";
 
 describe('Order Routes', () => {
     let testSetup: { pgContainer: StartedPostgreSqlContainer };
@@ -283,6 +285,61 @@ describe('Order Routes', () => {
             expect(response.body.totalPages).toBe(1);
             expect(response.body.list[0].status).toBe('CREATED');
             expect(response.body.list[0].orderDate).toBe(firstOrder.orderDate.toISOString());
+        });
+    });
+
+    it('should fail to upload the file if the file was not provided', async () => {
+        const response = await request(app)
+            .post('/api/order/upload');
+
+        expect(response.status).toBe(400);
+        expect(response.body.error).toBe('No file uploaded!');
+    });
+
+    it('should fail to upload the file if the file is not a json', async () => {
+        const fileBuffer = Buffer.from('Test file content', 'utf-8');
+
+        const response = await request(app)
+            .post('/api/order/upload')
+            .attach('file', fileBuffer, {
+                filename: 'file.png',
+                contentType: 'text/plain'
+            });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error).toBe('Only JSON files are allowed!');
+    });
+
+    it('should successfully upload data from file', async () => {
+        await RequestContext.create(db.orm.em, async () => {
+            const filePath = path.join(__dirname, '../../data/orders.json');
+
+            const response = await request(app)
+                .post('/api/order/upload')
+                .attach('file', filePath);
+
+            const orders = await getKnexQueryBuilder().from('orders').select();
+
+            expect(response.status).toBe(200);
+            expect(response.body.importedRecords).toBe(3);
+            expect(orders.length).toBe(3);
+            expect(orders[0].note).toBe('This order was imported using upload API');
+        });
+    });
+
+    it('should fail to upload data and be rolled back if any of the entries is invalid', async () => {
+        await RequestContext.create(db.orm.em, async () => {
+            const filePath = path.join(__dirname, '../../data/orders-not-valid.json');
+
+            const response = await request(app)
+                .post('/api/order/upload')
+                .attach('file', filePath);
+
+            const orders = await getKnexQueryBuilder().from('orders').select();
+
+            expect(response.status).toBe(500);
+            expect(response.body.error).toBe('Error processing the uploaded file!');
+            expect(orders.length).toBe(0);
         });
     });
 });

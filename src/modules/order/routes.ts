@@ -2,6 +2,7 @@ import { db } from '../../db';
 import { Router, Request, Response } from 'express';
 import { Order } from "./order.entity";
 import fileUpload from "express-fileupload";
+import { User } from "../user/user.entity";
 
 const router = Router();
 
@@ -134,14 +135,14 @@ router.post('/_list', async (req: Request, res: Response) => {
 
 router.post('/upload', async (req: Request, res: Response) => {
     if (!req.files || !req.files.file) {
-        res.status(400).send('No file uploaded');
+        res.status(400).json({ error: 'No file uploaded!' });
         return;
     }
 
     const uploadedFile = req.files.file as fileUpload.UploadedFile;
 
     if (uploadedFile.mimetype !== 'application/json') {
-        res.status(400).send('Only JSON files are allowed');
+        res.status(400).json({ error: 'Only JSON files are allowed!' });
         return;
     }
 
@@ -150,39 +151,40 @@ router.post('/upload', async (req: Request, res: Response) => {
     try {
         const ordersData = JSON.parse(fileContent);
 
-        await db.em.transactional(async (em) => {
-            let successfulImports = 0;
+        const successfulImports = await db.em.transactional(async (em) => {
+            let count = 0;
 
             for (const orderData of ordersData) {
-                try {
-                    const order = new Order();
-
-                    if (orderData.userId) {
-                        const user = await db.user.findOne(orderData.userId);
-                        user && (order.user = user);
-                    }
-
-                    order.deliveryAddress = orderData.deliveryAddress;
-                    order.orderDate = new Date(orderData.orderDate);
-                    order.status = orderData.status;
-                    order.note = orderData.note;
-
-                    db.order.create(order);
-                    successfulImports++;
-                } catch (err) {
-                    console.error(`Error processing order ${orderData.id}:`, err);
+                if (!orderData.deliveryAddress || !orderData.orderDate || !orderData.status) {
+                    throw new Error(`Invalid order data: ${JSON.stringify(orderData)}!`);
                 }
+
+                const order = new Order();
+
+                if (orderData.userId) {
+                    const user = await em.findOne(User, orderData.userId);
+                    user && (order.user = user);
+                }
+
+                order.deliveryAddress = orderData.deliveryAddress;
+                order.orderDate = new Date(orderData.orderDate);
+                order.status = orderData.status;
+                order.note = orderData.note;
+
+                em.persist(order);
+                count++;
             }
 
             await em.flush();
-            res.json({
-                importedRecords: successfulImports
-            });
+            return count;
         });
 
+        res.json({
+            importedRecords: successfulImports
+        });
     } catch (error) {
         console.error('Error processing file:', error);
-        res.status(500).send('Error processing the uploaded file');
+        res.status(500).json({ error: 'Error processing the uploaded file!' });
     }
 });
 
