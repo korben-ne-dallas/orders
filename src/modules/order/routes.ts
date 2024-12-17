@@ -9,11 +9,6 @@ const router = Router();
 router.get('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 
-    if (!id) {
-        res.status(400).json({ error: 'Order id is required!' });
-        return;
-    }
-
     const order = await db.order.findOne(+id, { populate: ['user'] });
 
     res.send(order);

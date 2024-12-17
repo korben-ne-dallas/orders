@@ -4,3 +4,4 @@ dist
 temp
 .env
 orders-app-key.json
+coverage
