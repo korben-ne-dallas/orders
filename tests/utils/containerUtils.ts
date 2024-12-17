@@ -8,7 +8,7 @@ export interface TestContainerSetup {
 }
 
 export async function setupTestContainer(): Promise<TestContainerSetup> {
-    const pgContainer = await new PostgreSqlContainer()
+    const pgContainer = await new PostgreSqlContainer('postgres:17.2-alpine')
         .withDatabase('test_db')
         .withUsername('postgres')
         .withPassword('postgres')
