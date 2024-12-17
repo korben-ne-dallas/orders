@@ -5,6 +5,21 @@ import { db } from '../../src/db';
 import { RequestContext } from '@mikro-orm/core';
 import { User } from "../../src/modules/user/user.entity";
 import  { cleanupTestContainer, resetDatabase, setupTestContainer } from '../utils/containerUtils';
+import { initializePubSub } from '../../src/pubsub/publishers/publisher';
+
+jest.mock('@google-cloud/pubsub', () => {
+    return {
+        PubSub: jest.fn().mockImplementation(() => ({
+            topic: jest.fn().mockReturnValue({
+                exists: () => [true],
+                subscription: () => ({
+                    exists: () => [true]
+                }),
+                publishMessage: jest.fn(),  // Use the mocked function here
+            }),
+        }))
+    };
+});
 
 describe('User Routes', () => {
     let testSetup: { pgContainer: StartedPostgreSqlContainer };
@@ -47,6 +62,23 @@ describe('User Routes', () => {
             email: user.email,
             name: user.name
         });
+    });
+
+    it('should create a new user and publish a message to pub/sub', async () => {
+        const { topic } = await initializePubSub();
+
+        const user = new User();
+        user.email = 'user@test.com';
+        user.name = 'New User';
+
+        const response = await request(app)
+            .post('/api/user')
+            .send(user);
+
+        const stringifyData = JSON.stringify({ userId: response.body.id });
+        const bufferData = Buffer.from(stringifyData);
+
+        expect(topic.publishMessage).toBeCalledWith({ data: bufferData });
     });
 
     it('should not create a new user if email is empty', async () => {

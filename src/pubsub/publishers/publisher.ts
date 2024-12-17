@@ -23,7 +23,7 @@ const pubsub = isPubSubEnabled
     })
     : null;
 
-async function initializePubSub(): Promise<{ topic: Topic; subscription: Subscription }> {
+export async function initializePubSub(): Promise<{ topic: Topic; subscription: Subscription }> {
     let topic: Topic = pubsub!.topic(config.topicName!);
 
     const [isTopicExists] = await topic.exists();
